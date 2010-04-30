@@ -6,22 +6,35 @@
  */
 var Lawnchair = function(opts) {
 	this.init(opts);
-}
+};
 
 Lawnchair.prototype = {
 	
 	init:function(opts) {
-		var adaptors = {
-			'webkit':window.WebkitSQLiteAdaptor,
-			'gears':window.GearsSQLiteAdaptor,
-			'dom':window.DOMStorageAdaptor,
-			'cookie':window.CookieAdaptor,
-			'air':window.AIRSQLiteAdaptor,
-			'userdata':window.UserDataAdaptor,
-			'air-async':window.AIRSQLiteAsyncAdaptor
-		};
-	
-		this.adaptor = opts.adaptor ? new adaptors[opts.adaptor](opts) : new WebkitSQLiteAdaptor(opts);
+		var adaptors = [
+			window.WebkitSQLiteAdaptor,
+			window.GearsSQLiteAdaptor,
+			window.DOMStorageAdaptor,
+			window.UserDataAdaptor,
+			window.CookieAdaptor
+		];
+		
+		this.adaptor = null;
+		
+		var worked;
+		for (var p=0; p<adaptors.length; p++) {
+			worked = true;
+			try {
+				this.adaptor = new adaptors[p](opts);
+			} catch (err) {
+				worked = false;
+			}
+			if (worked===true && this.adaptor) {
+				break;
+			}
+		}
+		
+		return !!this.adaptor;
 	},
 	
 	// Save an object to the store. If a key is present then update. Otherwise create a new record.
